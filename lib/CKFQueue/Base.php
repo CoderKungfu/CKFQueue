@@ -3,6 +3,8 @@ namespace CKFQueue;
 
 class Base
 {
+    static public $queue_path = array();
+    static public $queue_namespace = array();
     static public $worker_path = array();
     static public $worker_namespace = array();
 
@@ -20,8 +22,20 @@ class Base
 
     public static function init()
     {
-        \PHPQueue\Base::$queue_namespace = array('CKFQueue\Queues');
+        if (!is_array(self::$queue_namespace))
+        {
+            self::$queue_namespace = array();
+        }
+        \PHPQueue\Base::$queue_namespace = array_merge(array('CKFQueue\Queues'), self::$queue_namespace);
+
+        if (!is_array(self::$worker_namespace))
+        {
+            self::$worker_namespace = array();
+        }
         \PHPQueue\Base::$worker_namespace = array_merge(array('CKFQueue\Workers'), self::$worker_namespace);
+
+        if (!empty(self::$queue_path))
+            \PHPQueue\Base::$queue_path = array(self::$queue_path);
         if (!empty(self::$worker_path))
             \PHPQueue\Base::$worker_path = array(self::$worker_path);
     }
