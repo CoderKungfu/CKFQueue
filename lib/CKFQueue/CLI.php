@@ -15,7 +15,6 @@ class CLI
         $this->showHeader();
         $args = $this->parseArguments();
         Console::output('');
-        $this->debug = isset($args['debug']);
         $this->includeConfigFile($args);
         Base::init();
 
@@ -106,7 +105,7 @@ class CLI
         try
         {
             $config_class = \PHPQueue\Base::$config_class;
-            $config = $config_class::getConfig('Generic');
+            $config = $config_class::getConfig($this->queue);
             $result = $dataSource->getConnection()->statsTube($config['tube']);
             print_r($result);
         }
@@ -136,7 +135,7 @@ class CLI
     {
         $config_class = \PHPQueue\Base::$config_class;
         Console::stdout('Connecting to DataSource...');
-        $config = $config_class::getConfig('Generic');
+        $config = $config_class::getConfig($this->queue);
         $ds = \PHPQueue\Base::backendFactory($config['backend'], $config);
         Console::output('%g[OK]%n');
         return $ds;
@@ -210,7 +209,7 @@ class CLI
             $key = str_replace('-', '', $key);
             if ($key == 'config') $key = 'c';
             if ($key == 'debug') {
-                $args['debug'] = true;
+                $this->debug = true;
                 continue;
             }
 
@@ -226,6 +225,7 @@ class CLI
         }
 
         if (!isset($args['cmd'])) $args['cmd'] = 'help';
+        if (isset($args['queue'])) $this->queue = $args['queue'];
 
         return $args;
     }
