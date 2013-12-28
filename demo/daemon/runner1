@@ -1,0 +1,21 @@
+#!/usr/bin/php
+<?php
+#
+# runner1    Starts the CKFQueue runner
+#
+# chkconfig:    - 91 91
+# description:    Runner for CKFQueue
+#
+
+require "../config.php"; # Absolute path to the config file.
+
+class Runner1 extends CKFQueue\Daemon
+{
+    public $queue = 'Generic';
+}
+
+$pid = DemoConfig::getLogRoot() . '/runner1.pid';
+$log_root = DemoConfig::getLogRoot();
+
+$r = new Runner1($pid, $log_root);
+$r->run();

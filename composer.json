@@ -1,0 +1,28 @@
+{
+    "name": "CoderKungfu/CKFQueue",
+    "description": "A generic implementation of PHP-Queue",
+    "keywords": ["queue", "transaction"],
+    "homepage": "http://github.com/CoderKungfu/CKFQueue",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Cheng",
+            "email": "mcheng.work@gmail.com"
+        }
+    ],
+    "require": {
+        "coderkungfu/php-queue": "dev-master",
+        "clio/clio": "0.1.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "mrpoundsign/pheanstalk-5.3": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "CKFQueue": "lib/"
+        }
+    },
+    "bin":["bin/ckfqmanager"]
+}

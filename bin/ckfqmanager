@@ -1,0 +1,173 @@
+#!/usr/bin/php
+<?php
+$files = array(
+    dirname(__DIR__) . '/vendor/autoload.php',
+    dirname(dirname(dirname(__DIR__))) . '/autoload.php'
+);
+
+foreach ($files as $file) {
+    if (file_exists($file)) {
+        require_once $file;
+        break;
+    }
+}
+
+use Clio\Console;
+use CKFQueue\Base as CKFQ;
+
+Console::output('%_** CKFQueueManager - CLI Interface **%n');
+
+function showHelp()
+{
+    Console::output('');
+    Console::output('%_Usage:%n ckfqmanager (--config|-c) <configfile> [--debug] <action>');
+    Console::output('');
+    Console::output('Valid Actions:');
+    Console::output('==============');
+    Console::output('    %_stats%n           - Show statistics of the queue.');
+    Console::output('    %_work%n            - Work the next item in the queue.');
+    Console::output('    %_peek%n            - Have a look in the next item in the queue & release it back into the queue.');
+    Console::output('    %_pop%n             - Remove the next item in the queue.');
+    Console::output('    %_flush%n           - Flush all items in the queue.');
+    Console::output('');
+}
+
+$a = $argv;
+array_shift($a);
+
+$args = array();
+
+$num_args = count($a);
+
+if ($num_args < 1)
+{
+    Console::output("%R[Error]%n: %rInvalid number of arguments.%n");
+    showHelp();
+    exit;
+}
+
+for($i=0; $i<$num_args; $i++)
+{
+    $key = trim($a[$i]);
+    $key = str_replace('-', '', $key);
+    if ($key == 'config') $key = 'c';
+    if ($key == 'debug') {
+        $args['debug'] = true;
+        continue;
+    }
+
+    $i++;
+    if (!isset($a[$i]))
+    {
+        $args['cmd'] = $key;
+    }
+    else
+    {
+        $args[$key] = $a[$i];
+    }
+}
+
+if (!isset($args['c']) || !is_file($args['c']))
+{
+    Console::output("%R[Error]%n: %rConfig file not found.%n");
+    showHelp();
+    exit;
+}
+
+Console::output('');
+$debug = isset($args['debug']);
+
+if ($debug) Console::output("%C[Info]%n: Adding config file {$args['c']}");
+
+require_once($args['c']);
+
+CKFQ::init();
+
+if (!isset($args['cmd'])) $args['cmd'] = 'help';
+
+if ($debug) Console::output("%C[Info]%n: Preparing to execute: {$args['cmd']}");
+
+$options = array('queue'=>'Generic');
+$c = new PHPQueue\Cli($options);
+
+
+function getDataSource()
+{
+    global $config;
+    $config_class = \PHPQueue\Base::$config_class;
+    Console::stdout('Connecting to DataSource...');
+    $config = $config_class::getConfig('Generic');
+    $ds = \PHPQueue\Base::backendFactory($config['backend'], $config);
+    Console::output('%g[OK]%n');
+    return $ds;
+}
+
+switch($args['cmd'])
+{
+    case 'work':
+        $c->work();
+        break;
+    case 'peek':
+        $c->peek();
+        break;
+    case 'pop':
+        $dataSource = getDataSource();
+        if($dataSource->get() != null)
+        {
+            Console::stdout('%C[Info]%n: Clearing Job (ID: ' . $dataSource->last_job_id . ')... ');
+            $dataSource->clear($dataSource->last_job_id);
+            Console::output('%g[OK]%n');
+        }
+        Console::output('%gDone!%n');
+        break;
+    case 'flush':
+        $dataSource = getDataSource();
+        try
+        {
+            while($dataSource->get() != null)
+            {
+                Console::stdout('%C[Info]%n: Clearing Job (ID: ' . $dataSource->last_job_id . ')... ');
+                $dataSource->clear($dataSource->last_job_id);
+                Console::output('%g[OK]%n');
+            }
+        }
+        catch (\Exception $ex)
+        {
+            $msg = $ex->getMessage();
+            if ($msg == 'No job found.')
+            {
+                Console::output('%C[Info]%n: '.$ex->getMessage());
+            }
+            else
+            {
+                Console::output('%r[Error]%n: '.$ex->getMessage());
+            }
+        }
+        Console::output('%gDone!%n');
+        break;
+    case 'stats':
+        $dataSource = getDataSource();
+        try
+        {
+            $result = $dataSource->getConnection()->statsTube($config['tube']);
+            print_r($result);
+        }
+        catch (Exception $ex)
+        {
+            $msg = $ex->getMessage();
+            if ($msg == 'Server reported NOT_FOUND')
+            {
+                Console::output('%C[Info]%n: Queue is empty.');
+            }
+            else
+            {
+                Console::output('%R[Error]%n: '.$ex->getMessage());
+            }
+        }
+        Console::output('%gDone!%n');
+        break;
+    case 'help':
+    default:
+        showHelp();
+        break;
+}
