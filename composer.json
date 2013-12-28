@@ -1,5 +1,5 @@
 {
-    "name": "CoderKungfu/CKFQueue",
+    "name": "coderkungfu/ckfqueue",
     "description": "A generic implementation of PHP-Queue",
     "keywords": ["queue", "transaction"],
     "homepage": "http://github.com/CoderKungfu/CKFQueue",
