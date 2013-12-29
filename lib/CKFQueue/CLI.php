@@ -8,7 +8,7 @@ class CLI
     public $queue = 'Generic';
     public $debug = false;
     private $phpq_cli = null;
-    private $valid_cmd = array('work', 'peek', 'pop', 'flush', 'stats', 'help');
+    private $valid_cmd = array('add', 'work', 'peek', 'pop', 'flush', 'stats', 'help');
 
     public function run()
     {
@@ -27,13 +27,27 @@ class CLI
         }
         else
         {
-            $this->$cmd();
+            $this->$cmd($args);
         }
     }
 
     /********************************************************
      * Command Methods
      ********************************************************/
+
+    private function add($args)
+    {
+        if (!isset($args['worker']) || !isset($args['data']))
+        {
+            Console::output("%R[Error]%n: %rWorker and Data arguments not found.%n");
+            $this->help();
+            exit;
+        }
+        $payload = json_decode($args['data'], true);
+        $worker = explode(',', $args['worker']);
+        $payload['worker'] = $worker;
+        $this->getCLIInstance()->add($payload);
+    }
 
     private function work()
     {
@@ -245,6 +259,7 @@ class CLI
         Console::output('Valid Actions:');
         Console::output('==============');
         Console::output('    %_stats%n           - Show statistics of the queue.');
+        Console::output('    %_add%n             - Add to queue. Include: --worker <comma separated name of workers> --data <json format of data>');
         Console::output('    %_work%n            - Work the next item in the queue.');
         Console::output('    %_peek%n            - Have a look in the next item in the queue & release it back into the queue.');
         Console::output('    %_pop%n             - Remove the next item in the queue.');
