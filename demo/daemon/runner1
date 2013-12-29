@@ -11,7 +11,7 @@ require "../config.php"; # Absolute path to the config file.
 
 class Runner1 extends CKFQueue\Daemon
 {
-    public $queue = 'Generic';
+    public $queue_name = 'Generic';
 }
 
 $pid = DemoConfig::getLogRoot() . '/runner1.pid';

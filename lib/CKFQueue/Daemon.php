@@ -6,9 +6,11 @@ use Clio\Daemon as D;
 
 abstract class Daemon
 {
-    public $queue = 'Generic';
+    public $queue_name = 'Generic';
     public $pid_file;
     public $log_root;
+    public $stdout = '/tmp/stdout.log';
+    public $stderr = '/tmp/stderr.log';
 
     /**
      * @param string $pid_file
@@ -53,10 +55,12 @@ abstract class Daemon
             if (D::isRunning($this->pid_file)) {
                 Console::output('%y[Already Running]%n');
             } else {
-                $queue = $this->queue;
+                $queue = $this->queue_name;
                 $log_path = $this->log_root;
                 D::work(array(
-                        'pid' => $this->pid_file
+                          'pid' => $this->pid_file
+                        , 'stdout' => $this->stdout
+                        , 'stderr' => $this->stderr
                     ),
                     function($stdin, $stdout, $sterr) use ($queue, $log_path)
                     {
