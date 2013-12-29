@@ -138,6 +138,7 @@ class CLI
         $config = $config_class::getConfig($this->queue);
         $ds = \PHPQueue\Base::backendFactory($config['backend'], $config);
         Console::output('%g[OK]%n');
+
         return $ds;
     }
 
@@ -153,6 +154,7 @@ class CLI
             );
             $this->phpq_cli = new \PHPQueue\Cli($options);
         }
+
         return $this->phpq_cli;
     }
 

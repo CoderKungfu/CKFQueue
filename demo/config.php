@@ -20,6 +20,7 @@ class DemoConfig implements PHPQueue\Interfaces\Config
     static public function getConfig($type = null)
     {
         $config = isset(self::$backend_types[$type]) ? self::$backend_types[$type] : array();
+
         return $config;
     }
 

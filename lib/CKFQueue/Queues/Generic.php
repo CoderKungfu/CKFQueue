@@ -40,6 +40,7 @@ class Generic extends \PHPQueue\JobQueue
         $workers = $newJob['worker']; unset($newJob['worker']);
         $formatted_data = array('worker'=>$workers, 'data'=>$newJob);
         $this->dataSource->add($formatted_data);
+
         return true;
     }
 
@@ -49,6 +50,7 @@ class Generic extends \PHPQueue\JobQueue
         $nextJob = new \PHPQueue\Job($job_data, $this->dataSource->last_job_id);
         $this->currentJobs[$this->dataSource->last_job_id] = $nextJob;
         $this->last_job_id = $this->dataSource->last_job_id;
+
         return $nextJob;
     }
 

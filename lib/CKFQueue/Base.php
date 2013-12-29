@@ -45,6 +45,7 @@ class Base
         $queue = \PHPQueue\Base::getQueue($queue);
         $jobData = array_merge(array('worker'=>$workers), $payload);
         $queue->addJob($jobData);
+
         return true;
     }
 }
