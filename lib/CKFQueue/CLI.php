@@ -9,7 +9,7 @@ class CLI
     public $debug = false;
     private $phpq_cli = null;
     private $valid_cmd = array('add', 'work', 'peek', 'pop', 'flush', 'stats', 'help');
-    private $valid_opts = array('c', 'config');
+    private $valid_opts = array('c', 'config', 'bootstrap');
     private $init_args = array();
 
     public function __construct($options=array())
@@ -35,12 +35,19 @@ class CLI
     public function run()
     {
         $this->showHeader();
+
         $cli_args = $this->parseArguments();
         $args = array_merge($this->init_args, $cli_args);
-        Console::output('');
-        $this->includeConfigFile($args);
-        Base::init();
 
+        Console::output('');
+
+        $this->includeConfigFile($args);
+        if (!empty($args['bootstrap']))
+        {
+            $this->includeBootstrapFile($args['bootstrap']);
+        }
+
+        Base::init();
         $cmd = $args['cmd'];
         if ($this->debug) Console::output("%C[Info]%n: Preparing to execute: {$args['cmd']}");
 
@@ -224,6 +231,18 @@ class CLI
 
         if ($this->debug) Console::output("%C[Info]%n: Adding config file $full_config_path");
         require_once($full_config_path);
+    }
+
+    private function includeBootstrapFile($path)
+    {
+        $full_bootstrap_path = getcwd() . '/' . $path;
+        if (!file_exists($full_bootstrap_path))
+        {
+            Console::output("%R[Error]%n: %rBootstrap file not found.%n");
+            $this->help();
+            exit;
+        }
+        require_once($full_bootstrap_path);
     }
 
     private function parseArguments()
