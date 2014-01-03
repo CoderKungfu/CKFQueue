@@ -228,7 +228,7 @@ class CLI
 
         if (!file_exists($full_config_path))
         {
-            Console::output("%R[Error]%n: %rConfig file not found.%n");
+            Console::output("%R[Error]%n: %rConfig file not found ($full_config_path).%n");
             $this->help();
             exit;
         }
@@ -251,7 +251,7 @@ class CLI
 
         if (!file_exists($full_bootstrap_path))
         {
-            Console::output("%R[Error]%n: %rBootstrap file not found.%n");
+            Console::output("%R[Error]%n: %rBootstrap file not found ($full_bootstrap_path).%n");
             $this->help();
             exit;
         }
