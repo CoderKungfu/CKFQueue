@@ -9,11 +9,34 @@ class CLI
     public $debug = false;
     private $phpq_cli = null;
     private $valid_cmd = array('add', 'work', 'peek', 'pop', 'flush', 'stats', 'help');
+    private $valid_opts = array('c', 'config');
+    private $init_args = array();
+
+    public function __construct($options=array())
+    {
+        if (!empty($options))
+        {
+            if (!is_array($options))
+            {
+                Console::output('%r[Error]%n: Invalid startup options');
+                $this->help();
+                exit;
+            }
+            $valid_keys = array_flip($this->valid_opts);
+            $this->init_args = array_intersect_key($options, $valid_keys);
+            if (isset($this->init_args['config']))
+            {
+                $this->init_args['c'] = $this->init_args['config'];
+                unset($this->init_args['config']);
+            }
+        }
+    }
 
     public function run()
     {
         $this->showHeader();
-        $args = $this->parseArguments();
+        $cli_args = $this->parseArguments();
+        $args = array_merge($this->init_args, $cli_args);
         Console::output('');
         $this->includeConfigFile($args);
         Base::init();
@@ -179,16 +202,17 @@ class CLI
         {
             $full_config_path = getcwd() . '/' . $args['c'];
         }
-        else
+        else if (is_file(getcwd() . '/config.php'))
         {
-            if (is_file($_SERVER['home'] . '/ckfq-config.php'))
-            {
-                $full_config_path = $_SERVER['home'] . '/ckfq-config.php';
-            }
-            else if (is_file('/etc/ckfq-config.php'))
-            {
-                $full_config_path = '/etc/ckfq-config.php';
-            }
+            $full_config_path = getcwd() . '/config.php';
+        }
+        else if (is_file($_SERVER['home'] . '/ckfq-config.php'))
+        {
+            $full_config_path = $_SERVER['home'] . '/ckfq-config.php';
+        }
+        else if (is_file('/etc/ckfq-config.php'))
+        {
+            $full_config_path = '/etc/ckfq-config.php';
         }
 
         if (!is_file($full_config_path))
