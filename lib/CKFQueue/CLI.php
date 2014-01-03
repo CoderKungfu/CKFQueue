@@ -205,24 +205,28 @@ class CLI
     private function includeConfigFile($args)
     {
         $full_config_path = '';
-        if (isset($args['c']))
+        if (!empty($args['c']) && file_exists($args['c']))
         {
             $full_config_path = getcwd() . '/' . $args['c'];
         }
-        else if (is_file(getcwd() . '/config.php'))
+        else if (!empty($args['c']) && file_exists(getcwd() . '/' . $args['c']))
+        {
+            $full_config_path = getcwd() . '/' . $args['c'];
+        }
+        else if (file_exists(getcwd() . '/config.php'))
         {
             $full_config_path = getcwd() . '/config.php';
         }
-        else if (is_file($_SERVER['home'] . '/ckfq-config.php'))
+        else if (file_exists($_SERVER['home'] . '/ckfq-config.php'))
         {
             $full_config_path = $_SERVER['home'] . '/ckfq-config.php';
         }
-        else if (is_file('/etc/ckfq-config.php'))
+        else if (file_exists('/etc/ckfq-config.php'))
         {
             $full_config_path = '/etc/ckfq-config.php';
         }
 
-        if (!is_file($full_config_path))
+        if (!file_exists($full_config_path))
         {
             Console::output("%R[Error]%n: %rConfig file not found.%n");
             $this->help();
