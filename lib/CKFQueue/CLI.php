@@ -207,7 +207,7 @@ class CLI
         $full_config_path = '';
         if (!empty($args['c']) && file_exists($args['c']))
         {
-            $full_config_path = getcwd() . '/' . $args['c'];
+            $full_config_path = $args['c'];
         }
         else if (!empty($args['c']) && file_exists(getcwd() . '/' . $args['c']))
         {
@@ -240,6 +240,13 @@ class CLI
 
     private function includeBootstrapFile($path)
     {
+        if (empty($path))
+        {
+            Console::output("%R[Error]%n: %rInvalid bootstrap file ($path).%n");
+            $this->help();
+            exit;
+        }
+
         $full_bootstrap_path = '';
         if (file_exists($path))
         {
@@ -256,6 +263,8 @@ class CLI
             $this->help();
             exit;
         }
+
+        if ($this->debug) Console::output("%C[Info]%n: Adding bootstrap file $full_bootstrap_path");
 
         require_once($full_bootstrap_path);
     }
