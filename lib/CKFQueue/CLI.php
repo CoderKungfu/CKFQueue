@@ -235,13 +235,23 @@ class CLI
 
     private function includeBootstrapFile($path)
     {
-        $full_bootstrap_path = getcwd() . '/' . $path;
+        $full_bootstrap_path = '';
+        if (file_exists($path))
+        {
+            $full_bootstrap_path = $path;
+        }
+        else if (file_exists(getcwd() . '/' . $path))
+        {
+            $full_bootstrap_path = getcwd() . '/' . $path;
+        }
+
         if (!file_exists($full_bootstrap_path))
         {
             Console::output("%R[Error]%n: %rBootstrap file not found.%n");
             $this->help();
             exit;
         }
+
         require_once($full_bootstrap_path);
     }
 
