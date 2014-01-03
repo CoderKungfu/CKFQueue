@@ -234,6 +234,7 @@ class CLI
         }
 
         if ($this->debug) Console::output("%C[Info]%n: Adding config file $full_config_path");
+
         require_once($full_config_path);
     }
 
